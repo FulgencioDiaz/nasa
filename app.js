@@ -1,4 +1,5 @@
 const landings = require('./routes/landings')
+const neas = require('./routes/neas')
 const express = require('express')
 
 const app = express()
@@ -8,8 +9,7 @@ require('./db')()
 app.use(express.json())
 
 app.use('/api/astronomy/landings', landings)
-
-
+app.use('/api/astronomy/neas', neas)
 
 
 app.get('/ping', (req, res) => {
