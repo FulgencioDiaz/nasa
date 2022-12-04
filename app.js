@@ -1,5 +1,7 @@
 const landings = require('./routes/landings')
 const neas = require('./routes/neas')
+const users = require('./routes/users')
+
 const express = require('express')
 
 const app = express()
@@ -10,6 +12,7 @@ app.use(express.json())
 
 app.use('/api/astronomy/landings', landings)
 app.use('/api/astronomy/neas', neas)
+app.use('/api/users', users)
 
 
 app.get('/ping', (req, res) => {
