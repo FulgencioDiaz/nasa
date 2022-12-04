@@ -1,7 +1,8 @@
 
 const express = require('express')
-const User = require('../models/users')
+const {User, validate} = require('../models/users')
 const router = express.Router()
+const Joi = require('joi')
 
 
 /* router.get('/', async (req, res) => {
@@ -29,6 +30,9 @@ if (req.query.email){ const result = await User.find({email: req.query.email})
 })
 
 router.post('/create', async (req, res) => {
+    const {error} = validate(req.body)
+    if (error) return res.status(400).send(error.details[0].message)
+
     let user = new User(req.body)
     const newUSer = await user.save()
 
@@ -38,6 +42,9 @@ router.post('/create', async (req, res) => {
 
 
 router.put('/edit/:email', async (req, res) => {
+    const {error} = validate(req.body)
+    if (error) return res.status(400).send(error.details[0].message)
+
     const result =  await User.findOneAndUpdate({email: `${req.params.email}`}, req.body)
 
     res.send(result)

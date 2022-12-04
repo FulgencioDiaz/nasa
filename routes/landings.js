@@ -1,7 +1,8 @@
 
 const express = require('express')
-const Landing = require('../models/landings')
+const {Landing, validate} = require('../models/landings')
 const router = express.Router()
+const Joi = require('joi')
 
 router.get('/', async (req, res) => {
   
@@ -56,6 +57,10 @@ router.get('/recclass/:recclass', async (req, res) => {
 })
 
  router.post('/create', async (req, res) => {
+
+    const {error} = validate(req.body)
+    if (error) return res.status(400).send(error.details[0].message)
+
      let landing = new Landing(req.body)
      const newLanding = await landing.save()
 
@@ -63,6 +68,10 @@ router.get('/recclass/:recclass', async (req, res) => {
  })
 
 router.put('/edit/:id', async (req, res) => {
+
+    const {error} = validate(req.body)
+    if (error) return res.status(400).send(error.details[0].message)
+
     const landing = await Landing.findOneAndUpdate({id: `${req.params.id}`}, req.body)
 
     res.send(landing)

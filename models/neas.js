@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Joi = require('joi')
 
 const neaSchema = new mongoose.Schema({
   
@@ -17,4 +18,26 @@ const neaSchema = new mongoose.Schema({
 
 const Nea = mongoose.model('Nea', neaSchema)
 
-module.exports = Nea
+function validateNea(nea){
+  const schema = Joi.object({
+    designation: Joi.string().required(),
+    discovery_date: Joi.string().required(),
+    h_mag: Joi.number().required(),
+    moid_au: Joi.number().required(),
+    q_au_1: Joi.number().required(),
+    q_au_2: Joi.number().required(),
+    period_yr: Joi.number().required(),
+    i_deg: Joi.number().required(),
+    pha: Joi.string().required(),
+    orbit_class: Joi.string().required(),
+  })
+
+
+  return schema.validate(nea)
+}
+
+exports.Nea = Nea
+exports.neaSchema = neaSchema
+exports.validate = validateNea
+
+/*  module.exports = Nea ANTIGUO EXPORT */
