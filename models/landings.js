@@ -1,3 +1,4 @@
+const Joi = require('joi')
 const mongoose = require('mongoose')
 
 const landingSchema = new mongoose.Schema({
@@ -16,4 +17,26 @@ const landingSchema = new mongoose.Schema({
 
 const Landing = mongoose.model('Landing', landingSchema)
 
-module.exports = Landing
+
+function validateLanding(landing){
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    id: Joi.number().required(),
+    nametype: Joi.string().required(),
+    recclass: Joi.string().required(),
+    mass: Joi.number().required(),
+    fall: Joi.string().required(),
+    year: Joi.string().required(),
+    reclat: Joi.number().required(),
+    reclong: Joi.number().required(),
+  
+    })
+  
+  return schema.validate(landing)
+}
+
+exports.Landing = Landing
+exports.landingSchema = landingSchema
+exports.validate = validateLanding
+
+/* module.exports = Landing    ANTIGUO EXPORT*/  

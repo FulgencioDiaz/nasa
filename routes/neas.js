@@ -1,7 +1,8 @@
 
 const express = require('express')
-const Nea = require('../models/neas')
+const {Nea, validate} = require('../models/neas')
 const router = express.Router()
+const Joi = require('joi')
 
 router.get('/', async (req, res) => {
 
@@ -39,12 +40,18 @@ if (req.query.from && req.query.to){ const result = await Nea.find({discovery_da
 }})
 
 router.post('/create', async (req, res) => {
+    const {error} = validate(req.body)
+    if (error) return res.status(400).send(error.details[0].message)
+
     let nea = new Nea(req.body)
     const newNea = await nea.save()
 
     res.send(newNea)
 })
 router.put('/edit/:designation', async (req, res) => {
+    const {error} = validate(req.body)
+    if (error) return res.status(400).send(error.details[0].message)
+
     const RP = req.params.designation.replaceAll("-"," ")
     res.send(await Nea.findOneAndUpdate({designation: RP}, req.body))
  
