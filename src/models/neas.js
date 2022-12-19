@@ -1,8 +1,9 @@
-const mongoose = require('mongoose')
+//SCHEMA - NEAS
+
+const mongoose = require('mongoose');
 const Joi = require('joi')
 
-const neaSchema = new mongoose.Schema({
-  
+const neasSchema = new mongoose.Schema({
     designation: String,
     discovery_date: String,
     h_mag: Number,
@@ -14,30 +15,29 @@ const neaSchema = new mongoose.Schema({
     pha: String,
     orbit_class: String
 
-  });
+});
 
-const Nea = mongoose.model('Nea', neaSchema)
+function validateNea(neas){
+    const schema = Joi.object({
+        designation: Joi.string(),
+        discovery_date: Joi.string(),
+        h_mag: Joi.number(),
+        moid_au: Joi.number(),
+        q_au_1: Joi.number(),
+        q_au_2: Joi.number(),
+        period_yr: Joi.number(),
+        i_deg: Joi.number(),
+        pha: Joi.string(),
+        orbit_class: Joi.string()
+    })
 
-function validateNea(nea){
-  const schema = Joi.object({
-    designation: Joi.string().required(),
-    discovery_date: Joi.string().required(),
-    h_mag: Joi.number().required(),
-    moid_au: Joi.number().required(),
-    q_au_1: Joi.number().required(),
-    q_au_2: Joi.number().required(),
-    period_yr: Joi.number().required(),
-    i_deg: Joi.number().required(),
-    pha: Joi.string().required(),
-    orbit_class: Joi.string().required(),
-  })
-
-
-  return schema.validate(nea)
+    return schema.validate(neas)
 }
 
-exports.Nea = Nea
-exports.neaSchema = neaSchema
-exports.validate = validateNea
+//MODELS Y EXPORTAR MODULO
 
-/*  module.exports = Nea ANTIGUO EXPORT */
+const Neas = mongoose.model('Neas', neasSchema)
+
+module.exports = Neas
+
+module.exports.validate = validateNea;

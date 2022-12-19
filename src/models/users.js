@@ -1,42 +1,51 @@
+//SCHEMA - USERS
+
 const mongoose = require('mongoose')
 const Joi = require('joi')
 
-const userSchema = new mongoose.Schema({
-  
-    name: String,
+const usersSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
     nickname: String,
     email: String,
     picture: String,
-    affiliatedNumber: Number,
-    affiliationDate: String,
+    affiliatedNumber: {
+        type: Number,
+        unique: true,
+        required: true
+    },
+    affiliationDate: Date,
     occupation: String,
-    birthdate: String,
-    neas_discovered: [{type: mongoose.Schema.Types.ObjectId, ref: 'Neas'}]
-
-  }
- 
-
-  );
-
-const User = mongoose.model('User', userSchema)
+    birthdate: Date,
+    neas_discovered: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'neas'
+    }]
+    
+});
 
 function validateUser(user){
-  const schema = Joi.object({
-    name: Joi.string().required(),
-    nickname: Joi.string().required(),
-    email: Joi.string().required(),
-    picture: Joi.string().required(),
-    affiliatedNumber: Joi.number().required(),
-    affiliationDate: Joi.string().required(),
-    occupation: Joi.string().required(),
-    birthdate: Joi.string().required(),
-  })
+    const schema = Joi.object({
+        name: Joi.string().required(),
+        nickname: Joi.string(),
+        email: Joi.string(),
+        picture: Joi.string(),
+        affiliatedNumber: Joi.number().required(),
+        affiliationDate: Joi.string(),
+        occupation: Joi.string(),
+        birthdate: Joi.string(),
+        neas_discovered: Joi.array()
+    })
 
-  return schema.validate(user)
+    return schema.validate(user)
 }
 
-exports.User = User
-exports.uderSchema = userSchema
-exports.validate = validateUser
+//MODELS Y EXPORTAR MODULO
 
-/* module.exports = User ANTIGUO EXPORT  */
+const Users = mongoose.model('Users', usersSchema)
+
+module.exports = Users
+
+module.exports.validate = validateUser  
