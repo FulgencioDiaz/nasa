@@ -1,41 +1,43 @@
+//SCHEMA - LANDINGS
+
+const mongoose = require('mongoose');
 const Joi = require('joi')
-const mongoose = require('mongoose')
 
-const landingSchema = new mongoose.Schema({
-  name: String,
-  id: Number,
-  nametype: String,
-  recclass: String,
-  mass: Number,
-  fall: String,
-  year: String,
-  reclat: Number,
-  reclong: Number,
-  geolocation: {
-  latitude: Number, longitude: Number}
-  });
+const landingsSchema = new mongoose.Schema({
+    name: String,
+    id: Number,
+    nametype: String,
+    recclass: String,
+    mass: Number,
+    fall: String,
+    year: Number, 
+    reclat: Number,
+    reclong: Number,
+    geolocation: { "latitude": Number, "longitude": Number }
 
-const Landing = mongoose.model('Landing', landingSchema)
+});
 
-
-function validateLanding(landing){
-  const schema = Joi.object({
-    name: Joi.string().required(),
-    id: Joi.number().required(),
-    nametype: Joi.string().required(),
-    recclass: Joi.string().required(),
-    mass: Joi.number().required(),
-    fall: Joi.string().required(),
-    year: Joi.string().required(),
-    reclat: Joi.number().required(),
-    reclong: Joi.number().required(),
-  
+function validateLanding(landings){
+    const schema = Joi.object({
+        name: Joi.string(),
+        id: Joi.number(),
+        nametype: Joi.string(),
+        recclass: Joi.string(),
+        mass: Joi.number(),
+        fall: Joi.string(),
+        year: Joi.number(),
+        reclat: Joi.number(),
+        reclong: Joi.number(),
+        geolocation: { latitude: Joi.number(), longitude: Joi.number()}
     })
-  
-  return schema.validate(landing)
+
+    return schema.validate(landings)
 }
 
-exports.Landing = Landing
-exports.landingSchema = landingSchema
-exports.validate = validateLanding
+//MODELS Y EXPORTAR MODULO
 
+const Landings = mongoose.model('Landings', landingsSchema)
+
+module.exports = Landings
+
+module.exports.validate = validateLanding;
