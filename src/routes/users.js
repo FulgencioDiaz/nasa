@@ -1,62 +1,53 @@
+//RUTAS DE USERS
 
+const asyncRoutes = require('../middleware/async')
+const winston = require('winston')
+const Users = require('../models/users')
 const express = require('express')
-const {User, validate} = require('../models/users')
 const router = express.Router()
-const Joi = require('joi')
 
+//1_GET_OBTERNER UNA LISTA DE TODOS LOS USUARIOS.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/users/all
 
-/* router.get('/', async (req, res) => {
-   
-    const users = await User.find({})
-
-    res.send(users).status(200)
-
-    console.log(users)
-    
-}) */
-
- router.get('/', async (req, res) => {
-
-if (req.query.email){ const result = await User.find({email: req.query.email})                                 
-    
-    .select('email')
-
-
-    res.send(result)
-  
+router.get('/all', async (req,res) => {
+    const result = await Users.find({})
+        res.send(result)
 }
+)
 
+//2_GET_OBTENER UN USARIO POR E-MAIL.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/users?email=allamas@thebridgeschool.es
 
+router.get('/', async (req,res) => {
+    if(req.query.email){
+        const result = await Users.find({email: req.query.email})
+        res.send(result) 
+    }
 })
+
+//3_POST_CREAR UN NUEVO USUARIO.
 
 router.post('/create', async (req, res) => {
-    const {error} = validate(req.body)
-    if (error) return res.status(400).send(error.details[0].message)
-
-    let user = new User(req.body)
-    const newUSer = await user.save()
-
-    res.send(newUSer)
-    console.log(res.send(newUSer))
+    const user = new Users(req.body) 
+    const newuser = await user.save()
+    res.send(newuser)
+    winston.info('Nuevo usuario añadido a la base de datos.')
 })
 
+//4_PUT_EDITAR UN USARIO, SELECCIONAR POR E-MAIL.
 
 router.put('/edit/:email', async (req, res) => {
-    const {error} = validate(req.body)
-    if (error) return res.status(400).send(error.details[0].message)
-
-    const result =  await User.findOneAndUpdate({email: `${req.params.email}`}, req.body)
-
-    res.send(result)
- 
-
-    
+    const user = await Users.findOneAndUpdate({email: req.params.email}, req.body)
+    res.send(user)
+    winston.info(`Editado usuario con email: ${req.params.email}`)
 })
+
+//5_DELETE_ELIMINAR UN USUARIO, SELECCIONAR POR E-MAIL.
+
 router.delete('/delete/:email', async (req, res) => {
-    const result = await User.findOneAndDelete({email: `${req.params.email}`}, req.body)
-
-    res.send(result) 
+    const user = await Users.findOneAndDelete({email: req.params.email})
+    res.send(user)
+    winston.info(`Eliminado usuario con email: ${req.params.email}`)
 })
-
 
 module.exports = router
