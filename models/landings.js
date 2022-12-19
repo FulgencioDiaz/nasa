@@ -39,4 +39,3 @@ exports.Landing = Landing
 exports.landingSchema = landingSchema
 exports.validate = validateLanding
 
-/* module.exports = Landing    ANTIGUO EXPORT*/  
