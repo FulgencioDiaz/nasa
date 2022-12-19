@@ -1,86 +1,75 @@
+//RUTAS DE LANDINGS
 
+const asyncRoutes = require('../middleware/async')
+const Landings = require('../models/landings')
 const express = require('express')
-const {Landing, validate} = require('../models/landings')
 const router = express.Router()
-const Joi = require('joi')
+const winston = require('winston')
 
-router.get('/', async (req, res) => {
-  
-    if((req.query.minimum_mass)){
-        const landings = await Landing.find({mass: {$gte: parseInt(req.query.minimum_mass)}})
-        .sort('mass name')
-        .select('mass name')
-        res.send(landings)
-         
-    } else if (req.query.from && req.query.to){ 
-        const landings = await Landing.find({$and:[{fall: "Fell"}, {year: {$gte: req.query.from, $lte: req.query.to}}]})                                 
-        
-        .select('name mass year')
-        .sort('year')  
-        res.send(landings)
+//1_GET_NOMBRE Y MASA DE OBJETOS CON MASA SUPERIOR A LA ESPECIFICADA.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/landings/mass/minimo/50
 
+router.get('/mass/minimo/:mass', async (req, res) => {
+    
+    res.send (await Landings.find({mass: {$gte: `${req.params.mass}`}}).select('name mass'))
+    
+})
 
-    } else if (req.query.from){ const landings = await Landing.find({$and:[{fall: "Fell"}, {year: {$gte: req.query.from}}]})
-                                      
-        .select('name mass year')
-        .sort('year')
-        res.send(landings)
-
-
-    } else if (req.query.to){ const landings = await Landing.find({$and:[{fall: "Fell"}, {year: {$lte: req.query.to}}]})                                 
-        
-        .select('name mass year')
-        .sort('-year')  
-        res.send(landings)
-}})
-
+//2_GET_OBTENER NOMBRE Y MASA DE LOS METEORITOS CON UNA MASA CONCRETA ESPECIFICADA.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/landings/mass/21
 
 router.get('/mass/:mass', async (req, res) => {
-   
-    const landings = await Landing.find({mass: `${req.params.mass}`}).select('name mass')
-
-    res.send(landings).status(200)
-
-    console.log(landings)
     
+    res.send (await Landings.find({mass: `${req.params.mass}`}).select('name mass'))
+
 })
 
-router.get('/recclass/:recclass', async (req, res) => {
-   
-    const landings = await Landing.find({recclass: `${req.params.recclass}`})
-                                  .select('name recclass')
+//3_GET_OBTENER NOMBRE Y CLASE DE LOS METEORITOS CON UNA CLASE CONCRETA ESPECIFICADA.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/landings/class/H6
 
-    res.send(landings).status(200)
-
-    console.log(landings)
+router.get('/class/:recclass', async (req, res) => {
     
+    res.send (await Landings.find({recclass: `${req.params.recclass}`}).select('name recclass'))
+
 })
 
- router.post('/create', async (req, res) => {
+//4_GET_OBTENER NOMBRE, MASA Y FECHA DE LOS METEORITOS CAIDOS EN DETERMINADAS FECHAS.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/landings?from=1985&to=2022
 
-    const {error} = validate(req.body)
-    if (error) return res.status(400).send(error.details[0].message)
+router.get('/', async (req, res) => {
+   
 
-     let landing = new Landing(req.body)
-     const newLanding = await landing.save()
+    if (req.query.from && req.query.to){
+        const result =  await Landings.find({year: {$gt: req.query.from, $lt: req.query.to}})
+        .select('name mass year').sort('year')
+        res.send(result)
 
+    }
+})
+
+//5_POST_CREAR UN NUEVO LANDING EN LA BD.
+
+router.post('/create', async (req, res) => {
+    const landing = new Landings(req.body) 
+    const newLanding = await landing.save()
     res.send(newLanding)
- })
+    winston.info('Nuevo Landing añadido a la base de datos.')
+})
+
+//6_PUT_EDITAR UN LANDING, BUSQUEDA POR ID.
 
 router.put('/edit/:id', async (req, res) => {
-
-    const {error} = validate(req.body)
-    if (error) return res.status(400).send(error.details[0].message)
-
-    const landing = await Landing.findOneAndUpdate({id: `${req.params.id}`}, req.body)
-
+    const landing = await Landings.findOneAndUpdate({id: req.params.id}, req.body)
     res.send(landing)
+    winston.info(`Editado Landing con id: ${req.params.id}`)
 })
 
-router.delete('/delete/:id', async (req, res) => {
-    const landing = await Landing.findOneAndDelete({id: `${req.params.id}`}, req.body)
+//6_DELETE_BORRAR UN LANDING, BUSQUEDA POR ID.
 
+router.delete('/delete/:id', async (req, res) => {
+    const landing = await Landings.findOneAndDelete({id: req.params.id})
     res.send(landing)
+    winston.info(`Eliminado Landing con id: ${req.params.id}`)
 })
 
 module.exports = router

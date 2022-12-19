@@ -1,69 +1,54 @@
+//RUTAS DE NEAS
 
+const asyncRoutes = require('../middleware/async')
+const winston = require('winston')
+const Neas = require('../models/neas')
 const express = require('express')
-const {Nea, validate} = require('../models/neas')
 const router = express.Router()
-const Joi = require('joi')
 
-router.get('/', async (req, res) => {
+//1_GET_OBTENER DESIGNACIÓN Y PERIODO ANUAL EN BASE A LA CLASE ORBITAL DEL ASTEROIDE.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/neas/class/amor
 
-if (req.query.from && req.query.to){ const result = await Nea.find({discovery_date: {$gte: req.query.from, $lte: req.query.to}})                                 
-    
-    .select('designation discovery_date period_yr ')
-    .sort('discovery_date')
+router.get('/class/:class', async (req, res) => {
+    //console.log(req.query)
+    const neas = await Neas.find({$toLower: {orbit_class: `${req.query.class}`}}).select('designation period_yr')
+    res.send(neas)
+})
 
-    res.send(result)
-        
-} else if (req.query.from) { const result = await Nea.find({discovery_date: {$gte: req.query.from}})                                 
-    
-    .select('designation discovery_date period_yr ')
-    .sort('discovery_date')
+//2_GET_OBTENER DESIGNACIÓN, FECHA Y PERIODO ANUAL DE TODOS LOS ASTEROIDES QUE CUMPLAN CON UNA FECHA DADA.
+//Ruta de ejemplo: http://localhost:3000/api/astronomy/neas?from=1985&to=2022
 
-    res.send(result)
+router.get('/', async (req,res) => {
+    if (req.query.from && req.query.to){
+        const result = await Neas.find({discovery_date:{$gte: req.query.from, $lt: req.query.to}}).select('designation discovery_date period_yr')
+        res.send(result)
+    }
+})
 
-
-} else if (req.query.to) { const result = await Nea.find({discovery_date: {$lte: req.query.to}})                                 
-    
-    .select('designation discovery_date period_yr ')
-    .sort('discovery_date')
-
-    res.send(result)
-
-
-} else if (req.query.orbit_class) { const result = await Nea.find({orbit_class: req.query.orbit_class})                                 
-    
-    .select('designation period_yr ')
-    .sort('discovery_date')
-
-    res.send(result)
-
-
-}})
+//3_POST_CREAR UN NUEVO NEA EN LA BD.
 
 router.post('/create', async (req, res) => {
-    const {error} = validate(req.body)
-    if (error) return res.status(400).send(error.details[0].message)
-
-    let nea = new Nea(req.body)
-    const newNea = await nea.save()
-
-    res.send(newNea)
+    const nea = new Neas(req.body) 
+    const newnea = await nea.save()
+    res.send(newnea)
+    winston.info('Nuevo NEA añadido a la base de datos.')
 })
+
+//4_PUT_ACTUALIZAR NEA EN LA BASE DE DATOS, SELECCIONAR POR "DESIGNATION".
+
 router.put('/edit/:designation', async (req, res) => {
-    const {error} = validate(req.body)
-    if (error) return res.status(400).send(error.details[0].message)
-
-    const RP = req.params.designation.replaceAll("-"," ")
-    res.send(await Nea.findOneAndUpdate({designation: RP}, req.body))
- 
-
-    
+    const nea = await Neas.findOneAndUpdate({designation: req.params.designation}, req.body)
+    res.send(nea)
+    winston.info(`Editado NEA con designation: ${req.params.designation}`)
 })
+
+//5_DELETE_ELIMINAR NEA EN LA BASE DE DATOS, SELECCIONAR POR "DESIGNATION".
 
 router.delete('/delete/:designation', async (req, res) => {
-    const RP = req.params.designation.replaceAll("-"," ")
-    res.send(await Nea.findOneAndDelete({designation: RP }, req.body))
-
-   
+    const nea = await Neas.findOneAndDelete({designation: req.params.designation})
+    res.send(nea)
+    winston.info(`Eliminado NEA con designation: ${req.params.designation}`)
 })
+
 
 module.exports = router

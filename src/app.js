@@ -1,26 +1,23 @@
-const landings = require('./routes/landings')
-const neas = require('./routes/neas')
-const users = require('./routes/users')
+//APP
 
+const winston = require('winston')
 const express = require('express')
+const path = require('path');
+
 
 require('dotenv').config()
 
-const app = express()
+const app = express();
 
-require('./db')()
+require('./startup/logging')()
+require('./startup/routes')(app)
+require('./startup/db')()
 
-app.use(express.json())
+//ARCHIVOS ESTATICOS --- (NO HE CONSEGUIDO QUE CARGUEN DESDE "src/startup/routes.js")
 
-app.use('/api/astronomy/landings', landings)
-app.use('/api/astronomy/neas', neas)
-app.use('/api/users', users)
+app.use('/', express.static(path.join(__dirname, 'public')))
 
+//PUERTO DE ESCUCHA
 
-app.get('/ping', (req, res) => {
-    res.send('pong')
-})
-
-const port = 3000
-
-app.listen(port, () => console.log(`Servidor corriendo en http://localhost:${port}`))
+const port = process.env.PORT || 3000
+app.listen(port, () => winston.info(`SERVIDOR CONECTADO EN: http://localhost:${port}`))
